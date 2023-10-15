@@ -124,7 +124,7 @@ const Pixabay = () => {
                   <Block
                     $style={{ cursor: "pointer", borderRadius: "10px", overflow: "hidden" }}
                     onClick={() => addObject(image.src)}
-                    key={index}
+                    key={image.id}
                   >
                     <LazyLoadImage url={image.src} />
                   </Block>

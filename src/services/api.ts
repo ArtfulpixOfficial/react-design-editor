@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from "axios"
 import { IDesign, IComponent } from "~/interfaces/DesignEditor"
 import { Resource } from "~/interfaces/editor"
 import { getPixabayImages as gPi } from "./pixabay"
+import { getStockTemplate } from "./adobeStock"
 
 type IElement = any
 type IFontFamily = any
@@ -165,8 +166,8 @@ class ApiService {
   getPublicDesigns(): Promise<IDesign[]> {
     return new Promise(async (resolve, reject) => {
       try {
-        const { data } = await this.base.get("/designs")
-        resolve(data.designs)
+        const templates = await getStockTemplate("nature")
+        resolve(templates)
       } catch (err) {
         reject(err)
       }
@@ -275,7 +276,7 @@ class ApiService {
         //   `resources/pixabay/images?page=${props.page}&per_page=${props.perPage}&query=${props.query}`
         // )
         const res = await gPi(props.query, props.perPage, props.page, props.imageType)
-        console.log(res)
+        // console.log(res)
         const images = res.map((img: any) => ({
           src: img.largeImageURL,
           id: img.id,

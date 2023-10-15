@@ -1,10 +1,11 @@
-import React from "react"
+import React, { useState } from "react"
 import { useStyletron } from "baseui"
 import { Block } from "baseui/block"
 import { Button, SIZE } from "baseui/button"
 import AngleDoubleLeft from "~/components/Icons/AngleDoubleLeft"
 import Scrollable from "~/components/Scrollable"
-import { vectors } from "~/constants/mock-data"
+import InfiniteScrolling from "~/components/InfiniteScrolling"
+// import { vectors } from "~/constants/mock-data"
 import { useEditor } from "@layerhub-io/react"
 import useSetIsSidebarOpen from "~/hooks/useSetIsSidebarOpen"
 import api from "~/services/api"
@@ -12,13 +13,18 @@ const Graphics = () => {
   const inputFileRef = React.useRef<HTMLInputElement>(null)
 
   const editor = useEditor()
+  const [hasMore, setHasMore] = React.useState(true)
+  const [vectors, setVectors] = useState([])
+  const [pageNumber, setPageNumber] = React.useState(1)
+  const [isloading, setIsloading] = React.useState(true)
+  const [category, setCategory] = useState<string>("")
   const setIsSidebarOpen = useSetIsSidebarOpen()
 
   const addObject = React.useCallback(
     (url: string) => {
       if (editor) {
         const options = {
-          type: "StaticVector",
+          type: "StaticImage",
           src: url,
         }
         editor.objects.add(options)
@@ -26,6 +32,44 @@ const Graphics = () => {
     },
     [editor]
   )
+
+  const fetchData = React.useCallback(
+    async (reset?: boolean) => {
+      setIsloading(true)
+
+      const newVectors = await api.getPixabayImages({
+        query: category || "people",
+        perPage: 12,
+        page: pageNumber,
+        imageType: "vector",
+      })
+      // const newImages = await getPixabayImages(category || "nature")
+
+      if (newVectors.length === 0) {
+        setHasMore(false)
+        setIsloading(false)
+        return
+      }
+
+      let all = [...vectors, ...newVectors]
+      // Set only new images if reset = true. It should be useful for new queries
+      if (reset) {
+        all = newVectors
+      }
+      // @ts-ignore
+      setVectors(all)
+      setPageNumber(pageNumber + 1)
+      setIsloading(false)
+    },
+    [pageNumber, hasMore, category, vectors]
+  )
+
+  const makeSearch = () => {
+    setVectors([])
+    setPageNumber(1)
+    setIsloading(true)
+    fetchData(true)
+  }
 
   const handleDropFiles = (files: FileList) => {
     const file = files[0]
@@ -80,11 +124,13 @@ const Graphics = () => {
       <Scrollable>
         <input onChange={handleFileInput} type="file" id="file" ref={inputFileRef} style={{ display: "none" }} />
         <Block>
-          <Block $style={{ display: "grid", gap: "8px", padding: "1.5rem", gridTemplateColumns: "1fr 1fr" }}>
-            {vectors.map((vector, index) => (
-              <GraphicItem onClick={() => addObject(vector)} key={index} preview={vector} />
-            ))}
-          </Block>
+          <InfiniteScrolling fetchData={fetchData} hasMore={hasMore}>
+            <Block $style={{ display: "grid", gap: "8px", padding: "1.5rem", gridTemplateColumns: "1fr 1fr" }}>
+              {vectors.map((vector: any, index) => {
+                return <GraphicItem onClick={() => addObject(vector.src)} key={index} preview={vector.preview} />
+              })}
+            </Block>
+          </InfiniteScrolling>
         </Block>
       </Scrollable>
     </Block>
@@ -103,11 +149,11 @@ const GraphicItem = ({ preview, onClick }: { preview: any; onClick?: (option: an
         background: "#f8f8fb",
         cursor: "pointer",
         padding: "12px",
-        borderRadius: "8px",
+        borderRadius: "10px",
         overflow: "hidden",
-        "::before:hover": {
-          opacity: 1,
-        },
+        // "::before:hover": {
+        //   opacity: 1,
+        // },
       })}
     >
       <div
