@@ -13,7 +13,8 @@ class ApiService {
   base: AxiosInstance
   constructor() {
     this.base = axios.create({
-      baseURL: "https://layerhub-api.up.railway.app",
+      // baseURL: "https://layerhub-api.up.railway.app",
+      baseURL: "http://localhost:8080/api",
     })
   }
 
@@ -166,8 +167,8 @@ class ApiService {
   getPublicDesigns(): Promise<IDesign[]> {
     return new Promise(async (resolve, reject) => {
       try {
-        const templates = await getStockTemplate("nature")
-        resolve(templates)
+        const { data } = await this.base.get("/designs")
+        resolve(data.designs)
       } catch (err) {
         reject(err)
       }

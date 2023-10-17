@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useStyletron } from "baseui"
 import { Block } from "baseui/block"
 import AngleDoubleLeft from "~/components/Icons/AngleDoubleLeft"
@@ -8,12 +8,13 @@ import useSetIsSidebarOpen from "~/hooks/useSetIsSidebarOpen"
 import { getPixabayVideos } from "~/services/pixabay"
 import { getPexelsVideos } from "~/services/pexels"
 import useDesignEditorContext from "~/hooks/useDesignEditorContext"
+import InfiniteScrolling from "~/components/InfiniteScrolling"
 
 const loadVideoResource = (videoSrc: string): Promise<HTMLVideoElement> => {
   return new Promise(function (resolve, reject) {
     var video = document.createElement("video")
+    video.crossOrigin = "anonymous"
     video.src = videoSrc
-    video.crossOrigin = "anonymous| use-credentials"
     video.addEventListener("loadedmetadata", function (event) {
       video.currentTime = 1
     })
@@ -60,15 +61,45 @@ const Videos = () => {
   const setIsSidebarOpen = useSetIsSidebarOpen()
   const [videos, setVideos] = React.useState<any[]>([])
   const { scenes, setScenes, currentScene } = useDesignEditorContext()
+  const [hasMore, setHasMore] = React.useState(true)
+  const [pageNumber, setPageNumber] = React.useState(1)
+  const [isloading, setIsloading] = React.useState(true)
+  const [category, setCategory] = useState<string>("")
   const loadPixabayVideos = async () => {
     const videos = (await getPixabayVideos("people")) as any
     setVideos(videos)
   }
 
   const loadPexelsVideos = async () => {
-    const videos = (await getPexelsVideos("people")) as any
+    const videos = (await getPexelsVideos("people", 1)) as any
     setVideos(videos)
   }
+
+  const fetchData = React.useCallback(
+    async (reset?: boolean) => {
+      setIsloading(true)
+
+      const newVideos: any = await getPexelsVideos(category || "people", pageNumber)
+      // const newImages = await getPixabayImages(category || "nature")
+
+      if (newVideos.length === 0) {
+        setHasMore(false)
+        setIsloading(false)
+        return
+      }
+
+      let all = [...videos, ...newVideos]
+      // Set only new images if reset = true. It should be useful for new queries
+      if (reset) {
+        all = newVideos
+      }
+      // @ts-ignore
+      setVideos(all)
+      setPageNumber(pageNumber + 1)
+      setIsloading(false)
+    },
+    [pageNumber, hasMore, category, videos]
+  )
   React.useEffect(() => {
     loadPexelsVideos()
     // loadPixabayVideos()
@@ -114,12 +145,14 @@ const Videos = () => {
         </Block>
       </Block>
       <Scrollable>
-        <Block padding="0 1.5rem">
-          <div style={{ display: "grid", gap: "8px", gridTemplateColumns: "1fr 1fr" }}>
-            {videos.map((video, index) => {
-              return <img width="120px" key={index} src={video.preview} onClick={() => addObject(video)} />
-            })}
-          </div>
+        <Block>
+          <InfiniteScrolling fetchData={fetchData} hasMore={hasMore}>
+            <Block style={{ display: "grid", gap: "8px", gridTemplateColumns: "1fr 1fr", padding: "0 1.5rem" }}>
+              {videos.map((video, index) => {
+                return <ImageItem key={index} preview={video.preview} onClick={() => addObject(video)} />
+              })}
+            </Block>
+          </InfiniteScrolling>
         </Block>
       </Scrollable>
     </Block>

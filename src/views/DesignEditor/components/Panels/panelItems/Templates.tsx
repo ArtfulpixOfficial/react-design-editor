@@ -14,6 +14,7 @@ import { IScene } from "@layerhub-io/types"
 import { nanoid } from "nanoid"
 import api from "~/services/api"
 import useEditorType from "~/hooks/useEditorType"
+import { SAMPLE_TEMPLATES } from "~/constants/editor"
 
 export default function () {
   const editor = useEditor()
@@ -21,7 +22,7 @@ export default function () {
   const { setCurrentScene, currentScene, setScenes, setCurrentDesign } = useDesignEditorContext()
   const designs = useSelector(selectPublicDesigns)
   const editorType = useEditorType()
-  
+
   const loadGraphicTemplate = async (payload: IDesign): Promise<{ scenes: IScene[]; design: IDesign }> => {
     const scenes: IScene[] = []
     const { scenes: scns, ...design } = payload

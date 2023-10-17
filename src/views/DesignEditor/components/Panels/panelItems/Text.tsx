@@ -4,7 +4,6 @@ import { textComponents } from "~/constants/editor"
 import { useStyletron } from "styletron-react"
 import { useEditor } from "@layerhub-io/react"
 import { FontItem } from "~/interfaces/common"
-import { loadFonts } from "~/utils/fonts"
 import { ILayer, IStaticText } from "@layerhub-io/types"
 import { nanoid } from "nanoid"
 import { Block } from "baseui/block"
@@ -15,6 +14,7 @@ import { useSelector } from "react-redux"
 import { selectPublicComponents } from "~/store/slices/components/selectors"
 import api from "~/services/api"
 import { IComponent } from "~/interfaces/DesignEditor"
+import { loadFonts } from "~/utils/fonts"
 
 const textOptions = {
   id: nanoid(),
@@ -34,8 +34,8 @@ const textOptions = {
 export default function () {
   const editor = useEditor()
   const setIsSidebarOpen = useSetIsSidebarOpen()
-  const components = useSelector(selectPublicComponents) 
-  
+  const components = useSelector(selectPublicComponents)
+
   const addObject = async () => {
     if (editor) {
       const font: FontItem = {

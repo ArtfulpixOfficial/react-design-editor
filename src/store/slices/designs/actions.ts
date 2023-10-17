@@ -1,6 +1,7 @@
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit"
 import { IDesign } from "~/interfaces/DesignEditor"
 import api from "~/services/api"
+import { SAMPLE_TEMPLATES } from "~/constants/editor"
 
 export const setDesign = createAction<IDesign>("designs/setDesign")
 export const setPublicDesigns = createAction<IDesign[]>("designs/setPublicDesigns")

@@ -8,10 +8,10 @@ const pexelsClient = axios.create({
   },
 })
 
-export const getPexelsVideos = (query: string) => {
+export const getPexelsVideos = (query: string, page: any) => {
   return new Promise((resolve, reject) => {
     pexelsClient
-      .get(`/videos/search?query=${query}&per_page=20&size=small`)
+      .get(`/videos/search?query=${query}&per_page=20&size=small&page=${page}`)
       .then(({ data }) => {
         const videos = data.videos.map((video: any) => ({
           id: video.id,
@@ -22,7 +22,7 @@ export const getPexelsVideos = (query: string) => {
         }))
         resolve(videos)
       })
-      .catch((err) => { 
+      .catch((err) => {
         reject(err)
       })
   })

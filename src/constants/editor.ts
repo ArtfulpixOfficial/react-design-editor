@@ -1,5 +1,5 @@
 import { ILayer } from "@layerhub-io/types"
-
+import { IDesign } from "~/interfaces/DesignEditor"
 export const SecondLevelMenus = ["FontFamily"]
 export const FirstLevelMenus = ["Background"]
 
@@ -11,7 +11,7 @@ export enum SubMenuType {
   EFFECTS = "Effects",
 }
 
-export const SAMPLE_TEMPLATES = [
+export const SAMPLE_TEMPLATES: any = [
   {
     id: "0sXf_YEww2RXXCjdNkrWh",
     name: "Untitled design",
