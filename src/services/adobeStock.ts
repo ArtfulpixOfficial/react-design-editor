@@ -11,26 +11,24 @@ const adobeStockClient = axios.create({
   // maxRedirects: 5,
 })
 
-export const getStockTemplate = (query: string): Promise<IDesign[]> => {
+export const getStockImages = (query: string, pageNumber: number) => {
   return new Promise((resolve, reject) => {
     adobeStockClient
       .get(
-        `/Rest/Media/1/Search/Files?search_parameters[words]=${query}&search_parameters[limit]=${12}&search_parameters[filters][content_type:template]=${1}`
+        `/Rest/Media/1/Search/Files?search_parameters[words]=${query}&search_parameters[limit]=${20}&search_parameters[filters][content_type:photo]=${1}&search_parameters[offset]=${
+          pageNumber * 20
+        }`
       )
       .then(({ data: { files } }) => {
         console.log(files)
-        const templates = files.map((template: any) => ({
-          id: template.id,
-          type: "Design",
-          name: template.title,
-          previews: {
-            id: template.id,
-            src: template.thumbnail_url,
-          },
-          published: false,
-          metadata: {},
+        const images = files.map((image: any) => ({
+          id: image.id,
+          type: "StaticImage",
+          name: image.title,
+          src: image.thumbnail_url,
+          preview: image.thumbnail_url,
         }))
-        resolve(templates)
+        resolve(images)
       })
       .catch((err) => {
         reject(err)

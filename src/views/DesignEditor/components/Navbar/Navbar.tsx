@@ -318,23 +318,6 @@ const Navbar = () => {
           >
             <Play size={24} />
           </Button>
-
-          <Button
-            size="compact"
-            onClick={() => window.location.replace("https://github.com/layerhub-io/react-design-editor")}
-            kind={KIND.tertiary}
-          >
-            <Github size={24} />
-          </Button>
-
-          <Button
-            style={{ marginLeft: "0.5rem" }}
-            size="compact"
-            onClick={() => window.location.replace("https://app.scenify.io")}
-            kind={KIND.primary}
-          >
-            Try PRO
-          </Button>
         </Block>
       </Container>
     </ThemeProvider>
