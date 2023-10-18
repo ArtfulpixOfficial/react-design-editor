@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios"
 import { IDesign, IComponent } from "~/interfaces/DesignEditor"
 import { Resource } from "~/interfaces/editor"
 import { getPixabayImages as gPi } from "./pixabay"
-import { getStockTemplate } from "./adobeStock"
+// import { getStockTemplate } from "./adobeStock"
 
 type IElement = any
 type IFontFamily = any

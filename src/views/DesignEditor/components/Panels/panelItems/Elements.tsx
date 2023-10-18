@@ -2,8 +2,11 @@ import React, { useState } from "react"
 import { useEditor } from "@layerhub-io/react"
 import { useStyletron } from "baseui"
 import { Block } from "baseui/block"
+import Search from "~/components/Icons/Search"
+import { Input } from "baseui/input"
 import InfiniteScrolling from "~/components/InfiniteScrolling"
-import { Button, SIZE } from "baseui/button"
+import { Button } from "baseui/button"
+import { Spinner, SIZE } from "baseui/spinner"
 import AngleDoubleLeft from "~/components/Icons/AngleDoubleLeft"
 import Scrollable from "~/components/Scrollable"
 // import { graphics } from "~/constants/mock-data"
@@ -60,6 +63,13 @@ const Elements = () => {
     },
     [pageNumber, hasMore, category, graphics]
   )
+
+  const makeSearch = () => {
+    setGraphics([])
+    setPageNumber(1)
+    setIsloading(true)
+    fetchData(true)
+  }
   return (
     <Block $style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Block
@@ -76,6 +86,24 @@ const Elements = () => {
         <Block onClick={() => setIsSidebarOpen(false)} $style={{ cursor: "pointer", display: "flex" }}>
           <AngleDoubleLeft size={18} />
         </Block>
+      </Block>
+      <Block $style={{ padding: "1.5rem 1.5rem 1rem" }}>
+        <Input
+          overrides={{
+            Root: {
+              style: {
+                paddingLeft: "8px",
+              },
+            },
+          }}
+          onKeyDown={(key) => key.code === "Enter" && makeSearch()}
+          onBlur={makeSearch}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Search"
+          size={"compact"}
+          startEnhancer={<Search size={16} />}
+        />
       </Block>
       <Scrollable>
         {/* <Block padding={"0 1.5rem"}>
@@ -96,9 +124,17 @@ const Elements = () => {
           <InfiniteScrolling fetchData={fetchData} hasMore={hasMore}>
             <Block $style={{ display: "grid", gap: "8px", padding: "1.5rem", gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
               {graphics.map((graphic: any, index) => {
-                console.log(graphic)
                 return <ImageItem onClick={() => addObject(graphic.src)} key={index} preview={graphic.preview} />
               })}
+            </Block>
+            <Block
+              $style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingY: "2rem",
+              }}
+            >
+              {isloading && <Spinner $size={SIZE.large} />}
             </Block>
           </InfiniteScrolling>
         </Block>

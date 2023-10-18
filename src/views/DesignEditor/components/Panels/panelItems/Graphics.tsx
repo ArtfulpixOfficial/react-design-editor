@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { useStyletron } from "baseui"
 import { Block } from "baseui/block"
-import { Button, SIZE } from "baseui/button"
+import { Button, SIZE as ButtonSize } from "baseui/button"
 import AngleDoubleLeft from "~/components/Icons/AngleDoubleLeft"
 import Scrollable from "~/components/Scrollable"
 import InfiniteScrolling from "~/components/InfiniteScrolling"
@@ -9,6 +9,9 @@ import InfiniteScrolling from "~/components/InfiniteScrolling"
 import { useEditor } from "@layerhub-io/react"
 import useSetIsSidebarOpen from "~/hooks/useSetIsSidebarOpen"
 import api from "~/services/api"
+import Search from "~/components/Icons/Search"
+import { Input } from "baseui/input"
+import { Spinner, SIZE } from "baseui/spinner"
 const Graphics = () => {
   const inputFileRef = React.useRef<HTMLInputElement>(null)
 
@@ -109,7 +112,7 @@ const Graphics = () => {
       <Block padding="0 1.5rem">
         <Button
           onClick={handleInputFileRefClick}
-          size={SIZE.compact}
+          size={ButtonSize.compact}
           overrides={{
             Root: {
               style: {
@@ -121,6 +124,24 @@ const Graphics = () => {
           Computer
         </Button>
       </Block>
+      <Block $style={{ padding: "1.5rem 1.5rem 1rem" }}>
+        <Input
+          overrides={{
+            Root: {
+              style: {
+                paddingLeft: "8px",
+              },
+            },
+          }}
+          onKeyDown={(key) => key.code === "Enter" && makeSearch()}
+          onBlur={makeSearch}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Search"
+          size={"compact"}
+          startEnhancer={<Search size={16} />}
+        />
+      </Block>
       <Scrollable>
         <input onChange={handleFileInput} type="file" id="file" ref={inputFileRef} style={{ display: "none" }} />
         <Block>
@@ -129,6 +150,15 @@ const Graphics = () => {
               {vectors.map((vector: any, index) => {
                 return <GraphicItem onClick={() => addObject(vector.src)} key={index} preview={vector.preview} />
               })}
+            </Block>
+            <Block
+              $style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingY: "2rem",
+              }}
+            >
+              {isloading && <Spinner $size={SIZE.small} />}
             </Block>
           </InfiniteScrolling>
         </Block>

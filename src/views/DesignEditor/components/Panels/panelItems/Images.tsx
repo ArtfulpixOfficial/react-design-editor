@@ -1,15 +1,25 @@
-import React from "react"
+import React, { useState } from "react"
 import { useStyletron } from "baseui"
 import { Block } from "baseui/block"
 import AngleDoubleLeft from "~/components/Icons/AngleDoubleLeft"
 import Scrollable from "~/components/Scrollable"
-import { images } from "~/constants/mock-data"
+import InfiniteScrolling from "~/components/InfiniteScrolling"
+// import { images } from "~/constants/mock-data"
+import { getStockImages } from "~/services/adobeStock"
 import { useEditor } from "@layerhub-io/react"
 import useSetIsSidebarOpen from "~/hooks/useSetIsSidebarOpen"
+import Search from "~/components/Icons/Search"
+import { Input } from "baseui/input"
+import { Spinner, SIZE } from "baseui/spinner"
 
 const Images = () => {
   const editor = useEditor()
   const setIsSidebarOpen = useSetIsSidebarOpen()
+  const [images, setImages] = React.useState<any[]>([])
+  const [hasMore, setHasMore] = React.useState(true)
+  const [pageNumber, setPageNumber] = React.useState(1)
+  const [isloading, setIsloading] = React.useState(true)
+  const [category, setCategory] = useState<string>("")
 
   const addObject = React.useCallback(
     (url: string) => {
@@ -23,7 +33,38 @@ const Images = () => {
     },
     [editor]
   )
+  const fetchData = React.useCallback(
+    async (reset?: boolean) => {
+      setIsloading(true)
 
+      const newImages: any = await getStockImages(category || "people", pageNumber)
+      // const newImages = await getPixabayImages(category || "nature")
+
+      if (newImages.length === 0) {
+        setHasMore(false)
+        setIsloading(false)
+        return
+      }
+
+      let all = [...images, ...newImages]
+      // Set only new images if reset = true. It should be useful for new queries
+      if (reset) {
+        all = newImages
+      }
+      // @ts-ignore
+      setImages(all)
+      setPageNumber(pageNumber + 1)
+      setIsloading(false)
+    },
+    [pageNumber, hasMore, category, images]
+  )
+
+  const makeSearch = () => {
+    setImages([])
+    setPageNumber(1)
+    setIsloading(true)
+    fetchData(true)
+  }
   return (
     <Block $style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Block
@@ -41,13 +82,42 @@ const Images = () => {
           <AngleDoubleLeft size={18} />
         </Block>
       </Block>
+      <Block $style={{ padding: "1.5rem 1.5rem 1rem" }}>
+        <Input
+          overrides={{
+            Root: {
+              style: {
+                paddingLeft: "8px",
+              },
+            },
+          }}
+          onKeyDown={(key) => key.code === "Enter" && makeSearch()}
+          onBlur={makeSearch}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Search"
+          size={"compact"}
+          startEnhancer={<Search size={16} />}
+        />
+      </Block>
       <Scrollable>
         <Block padding="0 1.5rem">
-          <div style={{ display: "grid", gap: "8px", gridTemplateColumns: "1fr 1fr" }}>
-            {images.map((image, index) => {
-              return <ImageItem key={index} onClick={() => addObject(image.src.large)} preview={image.src.small} />
-            })}
-          </div>
+          <InfiniteScrolling fetchData={fetchData} hasMore={hasMore}>
+            <div style={{ display: "grid", gap: "8px", gridTemplateColumns: "1fr 1fr" }}>
+              {images.map((image, index) => {
+                return <ImageItem key={index} onClick={() => addObject(image.src)} preview={image.preview} />
+              })}
+            </div>
+            <Block
+              $style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingY: "2rem",
+              }}
+            >
+              {isloading && <Spinner $size={SIZE.small} />}
+            </Block>
+          </InfiniteScrolling>
         </Block>
       </Scrollable>
     </Block>

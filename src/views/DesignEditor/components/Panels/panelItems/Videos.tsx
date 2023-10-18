@@ -9,6 +9,9 @@ import { getPixabayVideos } from "~/services/pixabay"
 import { getPexelsVideos } from "~/services/pexels"
 import useDesignEditorContext from "~/hooks/useDesignEditorContext"
 import InfiniteScrolling from "~/components/InfiniteScrolling"
+import Search from "~/components/Icons/Search"
+import { Input } from "baseui/input"
+import { Spinner, SIZE } from "baseui/spinner"
 
 const loadVideoResource = (videoSrc: string): Promise<HTMLVideoElement> => {
   return new Promise(function (resolve, reject) {
@@ -104,7 +107,13 @@ const Videos = () => {
     loadPexelsVideos()
     // loadPixabayVideos()
   }, [])
-  console.log(videos)
+
+  const makeSearch = () => {
+    setVideos([])
+    setPageNumber(1)
+    setIsloading(true)
+    fetchData(true)
+  }
   const addObject = React.useCallback(
     async (options: any) => {
       if (editor) {
@@ -144,6 +153,24 @@ const Videos = () => {
           <AngleDoubleLeft size={18} />
         </Block>
       </Block>
+      <Block $style={{ padding: "1.5rem 1.5rem 1rem" }}>
+        <Input
+          overrides={{
+            Root: {
+              style: {
+                paddingLeft: "8px",
+              },
+            },
+          }}
+          onKeyDown={(key) => key.code === "Enter" && makeSearch()}
+          onBlur={makeSearch}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Search"
+          size={"compact"}
+          startEnhancer={<Search size={16} />}
+        />
+      </Block>
       <Scrollable>
         <Block>
           <InfiniteScrolling fetchData={fetchData} hasMore={hasMore}>
@@ -151,6 +178,15 @@ const Videos = () => {
               {videos.map((video, index) => {
                 return <ImageItem key={index} preview={video.preview} onClick={() => addObject(video)} />
               })}
+            </Block>
+            <Block
+              $style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingY: "2rem",
+              }}
+            >
+              {isloading && <Spinner $size={SIZE.small} />}
             </Block>
           </InfiniteScrolling>
         </Block>
